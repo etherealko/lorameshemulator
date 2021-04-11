@@ -8,7 +8,7 @@ namespace MeshEmulator.Logic
     {
         public int CurrentTick { get; set; }
 
-        public List<TransmitterNode> Nodes { get; }
+        public List<TransmitterNode> Nodes { get; set; }
 
         #region icontext explicit
         IEnumerable<ITransmitterNode<Context>> IContext<Context>.Nodes => Nodes;

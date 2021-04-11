@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MeshEmulator.Logic;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,21 @@ namespace MeshEmulator.App
         public MainWindow()
         {
             InitializeComponent();
+
+            var parameters = new TransmitterParameters();
+
+            var context = new Context { Nodes = new List<TransmitterNode>() };
+
+            context.Nodes.Add(new TransmitterNode(parameters) { Name = "1", Position = new TransmitterPosition(0, 0) });
+            context.Nodes.Add(new TransmitterNode(parameters) { Name = "2", Position = new TransmitterPosition(1, 0) });
+            context.Nodes.Add(new TransmitterNode(parameters) { Name = "3", Position = new TransmitterPosition(2, 0) });
+
+            var emulator = new Emulator<Context>(context);
+
+            context.Nodes[0].RequestTransmit(context);
+
+            for (;;)
+                emulator.ProcessNextTick();
         }
     }
 }

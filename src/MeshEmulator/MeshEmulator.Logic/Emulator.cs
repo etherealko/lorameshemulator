@@ -9,6 +9,8 @@ namespace MeshEmulator.Logic
     {
         public TContext Context { get; private set; }
 
+        public Emulator(TContext context) { Context = context; }
+
         public void ProcessNextTick()
         {
             ++Context.CurrentTick;
