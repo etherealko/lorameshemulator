@@ -5,8 +5,22 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MeshEmulator.App"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
+        Title="MainWindow" Height="450" Width="800" ResizeMode="CanResizeWithGrip" Name="_this" DataContext="{Binding ElementName=_this}">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <local:NodesControl Grid.Row="0" Background="#FFF0F0F0" x:Name="NodesGrid" Nodes="{Binding Nodes, Mode=OneTime}">
+        </local:NodesControl>
+        <Grid Grid.Row="2">
+            <StackPanel Orientation="Horizontal">
+                <Button HorizontalAlignment="Left" Click="Button_Click">Next</Button>
+                <Button HorizontalAlignment="Left" Click="Button_Click_1" Margin="15,0,0,0">Start</Button>
+                <Button HorizontalAlignment="Left" Click="Button_Click_2"  Margin="15,0,0,0">Stop</Button>
+                <TextBlock Name="CurrentTickTextBlock" Margin="15,0,0,0"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>

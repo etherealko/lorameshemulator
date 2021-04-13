@@ -15,7 +15,9 @@ namespace MeshEmulator.Logic
         {
             ++Context.CurrentTick;
 
-            foreach (var node in Context.Nodes.OrderBy(n => new Random().Next()))
+            var random = new Random();
+
+            foreach (var node in Context.Nodes.OrderBy(n => random.Next()))
                 node.ProcessTransmit(Context);
             foreach (var node in Context.Nodes)
                 node.ProcessReceive(Context);

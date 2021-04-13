@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace MeshEmulator.Logic
@@ -11,7 +12,7 @@ namespace MeshEmulator.Logic
         private readonly List<TransmissionBlockSignal> _receiveBuffer = new List<TransmissionBlockSignal>();
         private readonly List<Transmission> _seenMessages = new List<Transmission>();
 
-        private int _ticksFromLastReceivedBlock;
+        private int _ticksFromLastReceivedBlock = 1;
 
         private int _lastTransmissionId;
         private int _nextTransmitBlockNumber;
@@ -27,11 +28,14 @@ namespace MeshEmulator.Logic
             {
                 if (_nextTransmitBlockNumber != 0)
                     return TransmitterStatus.Transmitting;
-                if (ReceiveWindow.Count != 0)
+                if (_ticksFromLastReceivedBlock == 0)
                     return TransmitterStatus.Receiving;
                 return TransmitterStatus.Idle;
             }
         }
+
+        public int TransmitQueueLength => _transmitQueue.Count;
+        public int SeenMessagesCount => _seenMessages.Count;
 
         public TransmitterNode(TransmitterParameters parameters)
         {
@@ -79,7 +83,9 @@ namespace MeshEmulator.Logic
             if (_nextTransmitBlockNumber != 0)
                 return;
 
-            var signals = ReceiveWindow.OrderBy(s => s.SignalStrength).ToList();
+            var signals = ReceiveWindow.OrderByDescending(s => s.SignalStrength).ToList();
+
+            ReceiveWindow.Clear();
 
             if (signals.Count == 0)
             {
@@ -97,10 +103,8 @@ namespace MeshEmulator.Logic
                             _transmitQueue.Enqueue(first.Transmission);
                         }
                     }
-                    else
-                    {
-                        _receiveBuffer.Clear();
-                    }
+
+                    _receiveBuffer.Clear();
                 }
 
                 ++_ticksFromLastReceivedBlock;
@@ -121,7 +125,10 @@ namespace MeshEmulator.Logic
 
         public void RequestTransmit(Context ctx)
         {
-            _transmitQueue.Enqueue(new Transmission { Source = this, Id = ++_lastTransmissionId, CreatedAtTick = ctx.CurrentTick });
+            var transmission = new Transmission { Source = this, Id = ++_lastTransmissionId, CreatedAtTick = ctx.CurrentTick };
+
+            _transmitQueue.Enqueue(transmission);
+            _seenMessages.Add(transmission);
         }
     }
 
@@ -131,7 +138,7 @@ namespace MeshEmulator.Logic
 
         public int TransmissionLengthTicks { get; set; } = 10;
         public double NoiseCutoff { get; set; } = 1;
-        public double SnrCutoff { get; set; } = 10;
+        public double SnrCutoff { get; set; } = 3;
         public SignalStrengthFunction CalculateSignalStrength { get; set; } = d => 10 / d / d;
     }
 
@@ -160,6 +167,7 @@ namespace MeshEmulator.Logic
         Transmitting
     }
 
+    [DebuggerDisplay("strength: {SignalStrength} source: {SignalSource.Name}")]
     public class TransmissionBlockSignal
     {
         public Transmission Transmission { get; set; }
